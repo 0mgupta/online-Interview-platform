@@ -5,6 +5,7 @@ import { DM_Sans, Lora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Toaster } from "sonner";
+export const dynamic = 'force-dynamic';
 
 const lora = Lora({
   subsets: ["latin"],
