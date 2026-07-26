@@ -7,7 +7,7 @@ import {
   Hr,
 } from "@react-email/components";
 
-export function WithdrawalRequestEmail({
+export function WithdrawalRequestEmail({   
   interviewerName,
   interviewerEmail,
   credits,
