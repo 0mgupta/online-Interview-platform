@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
     >
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body className={`${lora.variable} ${dmSans.variable} font-sans`}>
+        <body className={`${lora.variable} ${dmSans.variable} font-sans bg-background text-foreground`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

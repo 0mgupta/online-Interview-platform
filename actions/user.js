@@ -1,14 +1,14 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 
 export const getCurrentUser = async () => {
-  const user = await currentUser();
-  if (!user) return null;
+  const { userId } = await auth();
+  if (!userId) return null;
 
   return db.user.findUnique({
-    where: { clerkUserId: user.id },
+    where: { clerkUserId: userId },
     select: {
       role: true,
       name: true,

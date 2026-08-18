@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getIntervieweeAppointments } from "@/actions/appointments";
@@ -9,14 +9,18 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
 
 export default async function MyAppointmentsPage() {
-  const user = await currentUser();
-  if (!user) redirect("/");
+  const { userId } = await auth();
+  if (!userId) redirect("/");
 
   const dbUser = await getCurrentUser();
   
-  // Redirect to onboarding if user hasn't completed it as an interviewee
-  if (!dbUser || dbUser.role !== "INTERVIEWEE") {
+  // Redirect based on role
+  if (!dbUser || dbUser.role === "UNASSIGNED") {
     redirect("/onboarding");
+  }
+
+  if (dbUser.role === "INTERVIEWER") {
+    redirect("/dashboard");
   }
 
   const appointments = await getIntervieweeAppointments();

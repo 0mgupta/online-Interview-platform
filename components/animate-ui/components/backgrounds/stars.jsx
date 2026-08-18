@@ -22,11 +22,18 @@ function StarLayer({
   className,
   ...props
 }) {
-  const [boxShadow, setBoxShadow] = React.useState('');
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setBoxShadow(generateStars(count, starColor));
-  }, [count, starColor]);
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
+  }, []);
+
+  const boxShadow = React.useMemo(() => {
+    if (!mounted) return '';
+    return generateStars(count, starColor);
+  }, [mounted, count, starColor]);
 
   return (
     <motion.div

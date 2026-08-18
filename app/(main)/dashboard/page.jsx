@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import PageHeader from "@/components/reusables";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,22 +15,29 @@ import { ClipboardList, Clock, Wallet } from "lucide-react";
 import { getCurrentUser } from "@/actions/user";
 
 export default async function InterviewerDashboardPage() {
-  let user;
+  let userId;
   try {
-    user = await currentUser();
+    const authResult = await auth();
+    userId = authResult.userId;
   } catch (err) {
-    // Clerk sometimes throws with no message — log the full error so you can see the real cause
-    console.error("currentUser() failed:", err?.errors ?? err);
+    console.error("auth() failed:", err?.errors ?? err);
     throw err;
   }
 
-  if (!user) redirect("/");
+  if (!userId) {
+    console.log("dashboard/page.jsx: userId is null, redirecting to /");
+    redirect("/");
+  }
 
   const dbUser = await getCurrentUser();
 
-  // Redirect to onboarding if user hasn't completed it as an interviewer
-  if (!dbUser || dbUser.role !== "INTERVIEWER") {
+  // Redirect based on role
+  if (!dbUser || dbUser.role === "UNASSIGNED") {
     redirect("/onboarding");
+  }
+
+  if (dbUser.role === "INTERVIEWEE") {
+    redirect("/explore");
   }
 
   const [availability, appointments, stats, withdrawalHistory] =

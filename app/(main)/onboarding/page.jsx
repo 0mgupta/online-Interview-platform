@@ -27,11 +27,10 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (data && !loading) {
-      router.refresh();
       setData(undefined); // Clear data so it doesn't re-trigger on 'back' navigation
-      router.push(role === "INTERVIEWER" ? "/dashboard" : "/explore");
+      window.location.href = role === "INTERVIEWER" ? "/dashboard" : "/explore";
     }
-  }, [data, loading, router, role, setData]);
+  }, [data, loading, role, setData]);
 
   const toggleCategory = (val) => {
     setForm((prev) => ({

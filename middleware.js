@@ -9,6 +9,11 @@ const isProtectedRoute = createRouteMatcher([
   "/onboarding(.*)",
 ]);
 
+const isAuthRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+]);
+
 // Trusted external webhooks — skip Arcjet entirely
 const isWebhookRoute = createRouteMatcher(["/api/webhooks/stream(.*)"]);
 
@@ -33,6 +38,10 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const { userId } = await auth();
+
+  if (userId && isAuthRoute(req)) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
 
   if (!userId && isProtectedRoute(req)) {
     const { redirectToSignIn } = await auth();

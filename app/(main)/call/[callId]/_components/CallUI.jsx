@@ -14,13 +14,13 @@ import {
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 
 // Stream Chat
+import { StreamChat } from "stream-chat";
 import {
   Chat,
   Channel,
   MessageList,
   MessageInput,
   Window,
-  useCreateChatClient,
 } from "stream-chat-react";
 import "stream-chat-react/dist/css/v2/index.css";
 
@@ -61,15 +61,36 @@ export default function CallUI({
   }, [call, onLeave]);
 
   // ── Chat client — same token works for both Video + Chat SDKs ──
-  const chatClient = useCreateChatClient({
-    apiKey,
-    tokenOrProvider: token,
-    userData: {
-      id: currentUser.id,
-      name: currentUser.name,
-      image: currentUser.imageUrl,
-    },
-  });
+  const [chatClient, setChatClient] = useState(null);
+
+  useEffect(() => {
+    const client = StreamChat.getInstance(apiKey);
+    let active = true;
+
+    client
+      .connectUser(
+        {
+          id: currentUser.id,
+          name: currentUser.name,
+          image: currentUser.imageUrl,
+        },
+        token
+      )
+      .then(() => {
+        if (active) {
+          setChatClient(client);
+        }
+      })
+      .catch(console.error);
+
+    return () => {
+      active = false;
+      // Delay disconnect to let components unmount cleanly
+      setTimeout(() => {
+        client.disconnectUser().catch(() => {});
+      }, 500);
+    };
+  }, [apiKey, token, currentUser]);
 
   const [chatChannel, setChatChannel] = useState(null);
 
@@ -90,7 +111,8 @@ export default function CallUI({
       .catch(console.error);
 
     return () => {
-      channel.stopWatching().catch(() => {});
+      // Clear state immediately to trigger component unmounting before client disconnect
+      setChatChannel(null);
     };
   }, [chatClient, callId, booking]);
 

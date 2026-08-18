@@ -59,9 +59,11 @@ function CodeBlock({
 
   React.useEffect(() => {
     if (!writing) {
-      setVisibleCode(code);
-      onDone?.();
-      onWrite?.({ index: code.length, length: code.length, done: true });
+      requestAnimationFrame(() => {
+        setVisibleCode(code);
+        onDone?.();
+        onWrite?.({ index: code.length, length: code.length, done: true });
+      });
       return;
     }
 

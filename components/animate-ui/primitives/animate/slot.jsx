@@ -33,6 +33,14 @@ function mergeProps(childProps, slotProps) {
   return merged;
 }
 
+const motionCache = new Map();
+function getMotionComponent(type) {
+  if (motionCache.has(type)) return motionCache.get(type);
+  const mc = motion.create(type);
+  motionCache.set(type, mc);
+  return mc;
+}
+
 function Slot(
   {
     children,
@@ -40,23 +48,20 @@ function Slot(
     ...props
   }
 ) {
+  if (!React.isValidElement(children)) return null;
+
   const isAlreadyMotion =
     typeof children.type === 'object' &&
     children.type !== null &&
     isMotionComponent(children.type);
 
-  const Base = React.useMemo(() =>
-    isAlreadyMotion
-      ? (children.type)
-      : motion.create(children.type), [isAlreadyMotion, children.type]);
-
-  if (!React.isValidElement(children)) return null;
+  const baseType = isAlreadyMotion ? children.type : getMotionComponent(children.type);
 
   const { ref: childRef, ...childProps } = children.props;
 
   const mergedProps = mergeProps(childProps, props);
 
-  return (<Base {...mergedProps} ref={mergeRefs(childRef, ref)} />);
+  return React.createElement(baseType, { ...mergedProps, ref: mergeRefs(childRef, ref) });
 }
 
 export { Slot };

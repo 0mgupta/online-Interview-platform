@@ -30,9 +30,15 @@ export default function CallRoom({
   const joinedRef = useRef(false);
 
   useEffect(() => {
-    // Guard against React StrictMode double-invoke in development
     if (joinedRef.current) return;
     joinedRef.current = true;
+
+    console.log("CallRoom client initialization details:", {
+      apiKey,
+      userId: currentUser.id,
+      token: token ? (token.substring(0, 15) + "...") : "missing",
+      callId
+    });
 
     const client = new StreamVideoClient({
       apiKey,
@@ -42,18 +48,81 @@ export default function CallRoom({
         image: currentUser.imageUrl,
       },
       token,
+      options: {
+        logOptions: {
+          default: {
+            level: "error",
+          },
+        },
+      },
     });
 
     const callInstance = client.call("default", callId);
 
-    callInstance
-      .join({ create: false })
-      .then(() => {
+    const checkDevicesAndJoin = async () => {
+      try {
+        let hasAudio = false;
+        let hasVideo = false;
+        let isAudioGranted = false;
+        let isVideoGranted = false;
+
+        if (typeof window !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          hasAudio = devices.some((d) => d.kind === "audioinput");
+          hasVideo = devices.some((d) => d.kind === "videoinput");
+        }
+
+        if (typeof window !== "undefined" && navigator.permissions && navigator.permissions.query) {
+          try {
+            const audioPermission = await navigator.permissions.query({ name: "microphone" });
+            isAudioGranted = audioPermission.state === "granted";
+          } catch (e) {
+            console.warn("Could not query microphone permission:", e);
+          }
+          try {
+            const videoPermission = await navigator.permissions.query({ name: "camera" });
+            isVideoGranted = videoPermission.state === "granted";
+          } catch (e) {
+            console.warn("Could not query camera permission:", e);
+          }
+        }
+
+        // Set media device states before joining based on permissions/availability
+        if (hasAudio && isAudioGranted) {
+          await callInstance.microphone.enable().catch(console.error);
+        } else {
+          console.warn("CallRoom: Audio disabled (missing or permission not granted).");
+          await callInstance.microphone.disable().catch(console.error);
+        }
+        if (hasVideo && isVideoGranted) {
+          await callInstance.camera.enable().catch(console.error);
+        } else {
+          console.warn("CallRoom: Video disabled (missing or permission not granted).");
+          await callInstance.camera.disable().catch(console.error);
+        }
+
+        await callInstance.join({ create: false });
         clientRef.current = client;
         setVideoClient(client);
         setCall(callInstance);
-      })
-      .catch(console.error);
+      } catch (err) {
+        console.warn("Failed to join call, disabling media devices and retrying...", err);
+        try {
+          // Disable both devices to bypass media capture failures
+          await callInstance.microphone.disable().catch(() => {});
+          await callInstance.camera.disable().catch(() => {});
+          
+          await callInstance.join({ create: false });
+          clientRef.current = client;
+          setVideoClient(client);
+          setCall(callInstance);
+        } catch (joinErr) {
+          console.error("Critical: Fallback join failed even with media disabled:", joinErr);
+        }
+      }
+    };
+
+    checkDevicesAndJoin();
 
     return () => {
       callInstance.leave().catch(() => {});

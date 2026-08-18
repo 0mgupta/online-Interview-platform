@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getInterviewers } from "@/actions/explore";
 import { getCurrentUser } from "@/actions/user";
@@ -6,14 +6,18 @@ import PageHeader from "@/components/reusables";
 import ExploreGrid from "./components/ExploreGrid";
 
 export default async function ExplorePage() {
-  const user = await currentUser();
-  if (!user) redirect("/");
+  const { userId } = await auth();
+  if (!userId) redirect("/");
 
   const dbUser = await getCurrentUser();
   
-  // Redirect to onboarding if user hasn't completed it as an interviewee
-  if (!dbUser || dbUser.role !== "INTERVIEWEE") {
+  // Redirect based on role
+  if (!dbUser || dbUser.role === "UNASSIGNED") {
     redirect("/onboarding");
+  }
+
+  if (dbUser.role === "INTERVIEWER") {
+    redirect("/dashboard");
   }
 
   const interviewers = await getInterviewers();
