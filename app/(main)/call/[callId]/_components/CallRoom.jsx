@@ -26,6 +26,7 @@ export default function CallRoom({
   const router = useRouter();
   const [videoClient, setVideoClient] = useState(null);
   const [call, setCall] = useState(null);
+  const [mediaError, setMediaError] = useState(null);
   const clientRef = useRef(null);
   const joinedRef = useRef(false);
 
@@ -93,20 +94,26 @@ export default function CallRoom({
         if (hasAudio && isAudioGranted) {
           await callInstance.microphone.enable().catch((err) => {
             console.warn("CallRoom: Failed to get audio stream, disabling microphone. Error:", err);
+            const isSystemDenied = err.name === "NotAllowedError" || err.message?.includes("Permission denied") || err.message?.includes("Permission dismissed");
+            setMediaError((prev) => ({ ...prev, audio: isSystemDenied ? "system-denied" : "failed" }));
             return callInstance.microphone.disable().catch(() => {});
           });
         } else {
           console.warn("CallRoom: Audio disabled (missing device or permission denied).");
+          setMediaError((prev) => ({ ...prev, audio: !hasAudio ? "missing" : "denied" }));
           await callInstance.microphone.disable().catch(() => {});
         }
 
         if (hasVideo && isVideoGranted) {
           await callInstance.camera.enable().catch((err) => {
             console.warn("CallRoom: Failed to get video stream, disabling camera. Error:", err);
+            const isSystemDenied = err.name === "NotAllowedError" || err.message?.includes("Permission denied") || err.message?.includes("Permission dismissed");
+            setMediaError((prev) => ({ ...prev, video: isSystemDenied ? "system-denied" : "failed" }));
             return callInstance.camera.disable().catch(() => {});
           });
         } else {
           console.warn("CallRoom: Video disabled (missing device or permission denied).");
+          setMediaError((prev) => ({ ...prev, video: !hasVideo ? "missing" : "denied" }));
           await callInstance.camera.disable().catch(() => {});
         }
 
@@ -172,6 +179,7 @@ export default function CallRoom({
           apiKey={apiKey}
           token={token}
           currentUser={currentUser}
+          mediaError={mediaError}
         />
       </StreamCall>
     </StreamVideo>

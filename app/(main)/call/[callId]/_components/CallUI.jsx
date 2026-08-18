@@ -25,7 +25,7 @@ import {
 import "stream-chat-react/dist/css/v2/index.css";
 
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Sparkles, Loader2 } from "lucide-react";
+import { MessageSquare, Sparkles, Loader2, AlertTriangle } from "lucide-react";
 import AIQuestionsPanel from "./AIQuestions";
 
 // ─── Call UI (inside StreamCall context) ─────────────────────────────────────
@@ -38,6 +38,7 @@ export default function CallUI({
   apiKey,
   token,
   currentUser,
+  mediaError,
 }) {
   const { useCallCallingState } = useCallStateHooks();
   const call = useCall();
@@ -147,6 +148,56 @@ export default function CallUI({
           )}
         </div>
       </div>
+
+      {/* Media Error Banners */}
+      {mediaError && (mediaError.audio || mediaError.video) && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2.5 flex flex-col gap-1.5 shrink-0">
+          {mediaError.audio === "system-denied" && (
+            <div className="flex items-center gap-2 text-amber-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0" />
+              <span>
+                <strong>Microphone Blocked by System:</strong> Access was denied by your operating system or browser settings. Please enable microphone permissions in your system settings (Windows Privacy settings or macOS System Settings) and browser site settings, then refresh the page.
+              </span>
+            </div>
+          )}
+          {mediaError.audio === "denied" && (
+            <div className="flex items-center gap-2 text-amber-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0" />
+              <span>
+                <strong>Microphone Blocked:</strong> Site permission was denied. Please allow microphone access in your browser settings (click the lock icon in the address bar), then refresh the page.
+              </span>
+            </div>
+          )}
+          {mediaError.audio === "missing" && (
+            <div className="flex items-center gap-2 text-stone-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0 text-stone-500" />
+              <span>No microphone device was detected. Please connect a microphone to join with audio.</span>
+            </div>
+          )}
+          {mediaError.video === "system-denied" && (
+            <div className="flex items-center gap-2 text-amber-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0" />
+              <span>
+                <strong>Camera Blocked by System:</strong> Access was denied by your operating system or browser settings. Please enable camera permissions in your system settings (Windows Privacy settings or macOS System Settings) and browser site settings, then refresh the page.
+              </span>
+            </div>
+          )}
+          {mediaError.video === "denied" && (
+            <div className="flex items-center gap-2 text-amber-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0" />
+              <span>
+                <strong>Camera Blocked:</strong> Site permission was denied. Please allow camera access in your browser settings (click the lock icon in the address bar), then refresh the page.
+              </span>
+            </div>
+          )}
+          {mediaError.video === "missing" && (
+            <div className="flex items-center gap-2 text-stone-400 text-xs">
+              <AlertTriangle size={14} className="shrink-0 text-stone-500" />
+              <span>No camera device was detected. Please connect a camera to join with video.</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Body: video + side panel */}
       <div className="flex flex-1 min-h-0">
