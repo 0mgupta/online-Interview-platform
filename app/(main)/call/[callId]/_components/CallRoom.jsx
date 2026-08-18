@@ -63,8 +63,8 @@ export default function CallRoom({
       try {
         let hasAudio = false;
         let hasVideo = false;
-        let isAudioGranted = false;
-        let isVideoGranted = false;
+        let isAudioGranted = true; // Default to true so we attempt to prompt if state is "prompt"
+        let isVideoGranted = true;
 
         if (typeof window !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
           const devices = await navigator.mediaDevices.enumerateDevices();
@@ -75,13 +75,15 @@ export default function CallRoom({
         if (typeof window !== "undefined" && navigator.permissions && navigator.permissions.query) {
           try {
             const audioPermission = await navigator.permissions.query({ name: "microphone" });
-            isAudioGranted = audioPermission.state === "granted";
+            // Only block if explicitly denied. If "prompt" or "granted", we should attempt to enable.
+            isAudioGranted = audioPermission.state !== "denied";
           } catch (e) {
             console.warn("Could not query microphone permission:", e);
           }
           try {
             const videoPermission = await navigator.permissions.query({ name: "camera" });
-            isVideoGranted = videoPermission.state === "granted";
+            // Only block if explicitly denied. If "prompt" or "granted", we should attempt to enable.
+            isVideoGranted = videoPermission.state !== "denied";
           } catch (e) {
             console.warn("Could not query camera permission:", e);
           }
@@ -89,16 +91,23 @@ export default function CallRoom({
 
         // Set media device states before joining based on permissions/availability
         if (hasAudio && isAudioGranted) {
-          await callInstance.microphone.enable().catch(console.error);
+          await callInstance.microphone.enable().catch((err) => {
+            console.warn("CallRoom: Failed to get audio stream, disabling microphone. Error:", err);
+            return callInstance.microphone.disable().catch(() => {});
+          });
         } else {
-          console.warn("CallRoom: Audio disabled (missing or permission not granted).");
-          await callInstance.microphone.disable().catch(console.error);
+          console.warn("CallRoom: Audio disabled (missing device or permission denied).");
+          await callInstance.microphone.disable().catch(() => {});
         }
+
         if (hasVideo && isVideoGranted) {
-          await callInstance.camera.enable().catch(console.error);
+          await callInstance.camera.enable().catch((err) => {
+            console.warn("CallRoom: Failed to get video stream, disabling camera. Error:", err);
+            return callInstance.camera.disable().catch(() => {});
+          });
         } else {
-          console.warn("CallRoom: Video disabled (missing or permission not granted).");
-          await callInstance.camera.disable().catch(console.error);
+          console.warn("CallRoom: Video disabled (missing device or permission denied).");
+          await callInstance.camera.disable().catch(() => {});
         }
 
         await callInstance.join({ create: false });
