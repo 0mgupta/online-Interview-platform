@@ -26,7 +26,7 @@ export default function CallRoom({
   const router = useRouter();
   const [videoClient, setVideoClient] = useState(null);
   const [call, setCall] = useState(null);
-  const [mediaError, setMediaError] = useState(null);
+  const [mediaError, setMediaError] = useState({ audio: null, video: null });
   const clientRef = useRef(null);
   const joinedRef = useRef(false);
 
