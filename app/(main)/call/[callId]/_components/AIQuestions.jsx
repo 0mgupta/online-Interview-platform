@@ -22,7 +22,7 @@ export default function AIQuestionsPanel({ categories }) {
   const questions = data?.questions ?? [];
 
   return (
-    <div className="flex flex-col gap-4 h-full overflow-hidden">
+    <div className="flex flex-col gap-4 h-full overflow-hidden text-graphite bg-white">
       {/* Category selector */}
       <div className="flex flex-wrap gap-1.5">
         {categories?.map((cat) => (
@@ -30,11 +30,14 @@ export default function AIQuestionsPanel({ categories }) {
             key={cat}
             type="button"
             onClick={() => setSelectedCategory(cat)}
-            className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
-              selectedCategory === cat
-                ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                : "border-white/10 text-stone-500 hover:border-white/20 hover:text-stone-400"
-            }`}
+            className="cursor-pointer text-xs px-3 py-1.5 transition-colors duration-150"
+            style={{
+              borderRadius: "20px",
+              border: `1px solid ${selectedCategory === cat ? "#ff682c" : "#e8e8e8"}`,
+              background: selectedCategory === cat ? "#ff682c/5" : "transparent",
+              color: selectedCategory === cat ? "#ff682c" : "#828282",
+              fontFamily: "var(--font-inter)",
+            }}
           >
             {CATEGORY_LABEL[cat] ?? cat}
           </button>
@@ -42,7 +45,7 @@ export default function AIQuestionsPanel({ categories }) {
       </div>
 
       <Button
-        variant="gold"
+        variant="default"
         size="sm"
         disabled={loading || !selectedCategory}
         onClick={() => generateFn({ category: selectedCategory })}
@@ -62,7 +65,7 @@ export default function AIQuestionsPanel({ categories }) {
       </Button>
 
       {error && (
-        <p className="text-xs text-red-400">{error?.message || error}</p>
+        <p className="text-xs text-red-500">{error?.message || error}</p>
       )}
 
       {/* Questions list */}
@@ -71,25 +74,40 @@ export default function AIQuestionsPanel({ categories }) {
           {questions.map((q, i) => (
             <div
               key={i}
-              className="rounded-xl border border-white/8 bg-[#141417] p-4 flex flex-col gap-2"
+              className="p-4 flex flex-col gap-2"
+              style={{
+                background: "#efefef",
+                border: "none",
+                borderRadius: "8px",
+              }}
             >
-              <p className="text-sm text-stone-200 font-medium leading-snug">
+              <p
+                className="text-sm font-medium leading-snug"
+                style={{ color: "#202020", fontFamily: "var(--font-inter)" }}
+              >
                 {i + 1}. {q.question}
               </p>
-              <div className="h-px bg-white/5" />
-              <p className="text-xs text-stone-500 font-light leading-relaxed">
-                <span className="text-amber-400/70 font-medium">Answer: </span>
+              <div className="h-px" style={{ background: "#e8e8e8" }} />
+              <p className="text-xs leading-relaxed" style={{ color: "#4d4d4d" }}>
+                <span className="font-semibold" style={{ color: "#ff682c" }}>Answer: </span>
                 {q.answer}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
-          <span className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-            <Sparkles size={16} className="text-amber-400" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center py-10">
+          <span
+            className="w-10 h-10 flex items-center justify-center"
+            style={{
+              background: "#efefef",
+              border: "1px solid #e8e8e8",
+              borderRadius: "8px",
+            }}
+          >
+            <Sparkles size={16} className="text-graphite" />
           </span>
-          <p className="text-xs text-stone-600">
+          <p className="text-xs" style={{ color: "#828282" }}>
             Select a category and generate role-specific questions for this
             session.
           </p>

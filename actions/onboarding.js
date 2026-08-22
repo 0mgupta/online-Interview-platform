@@ -22,6 +22,14 @@ export const completeOnboarding = async (data) => {
     }
   }
 
+  const existingUser = await db.user.findUnique({
+    where: { clerkUserId: user.id },
+  });
+
+  if (existingUser && existingUser.role !== "UNASSIGNED") {
+    throw new Error("Your role is already set and cannot be changed.");
+  }
+
   try {
     await db.user.update({
       where: { clerkUserId: user.id },

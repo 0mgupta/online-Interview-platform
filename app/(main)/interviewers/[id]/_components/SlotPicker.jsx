@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { GrayTitle } from "@/components/reusables";
 import { bookSlot } from "@/actions/booking";
 import useFetch from "@/hooks/use-fetch";
 import UpgradeModal from "@/components/UpgradeModal";
@@ -90,10 +89,16 @@ export default function SlotPicker({
 
   if (!availability) {
     return (
-      <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 text-center flex flex-col items-center gap-2">
-        <span className="text-2xl">🕐</span>
-        <p className="text-sm text-stone-500">No availability set yet.</p>
-        <p className="text-xs text-stone-700">Check back later.</p>
+      <div
+        className="p-8 text-center flex flex-col items-center gap-2"
+        style={{
+          background: "#efefef",
+          borderRadius: "8px",
+        }}
+      >
+        <span className="text-xl">🕐</span>
+        <p className="text-sm font-medium" style={{ color: "#202020" }}>No availability set yet.</p>
+        <p className="text-xs" style={{ color: "#828282" }}>Check back later.</p>
       </div>
     );
   }
@@ -107,23 +112,45 @@ export default function SlotPicker({
       />
 
       <div className="flex flex-col gap-4">
-        {/* ── Main picker card ── */}
-        <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-7 flex flex-col gap-6">
+        {/* Main picker card */}
+        <div
+          className="p-7 flex flex-col gap-6"
+          style={{
+            background: "#efefef",
+            borderRadius: "6px 0px 6px 6px",
+          }}
+        >
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="font-serif text-xl tracking-tight">
-                <GrayTitle>Book a session</GrayTitle>
+              <h2
+                className="text-lg"
+                style={{
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.02em",
+                  color: "#202020",
+                }}
+              >
+                Book a session
               </h2>
-              <p className="text-xs text-stone-500 font-light mt-1">
+              <p className="text-xs mt-1" style={{ color: "#828282" }}>
                 Select a date and available time slot.
               </p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-xs text-stone-600">Cost</p>
-              <p className="font-serif text-2xl leading-none bg-linear-to-br from-amber-300 to-amber-500 bg-clip-text text-transparent">
+              <p className="text-xs" style={{ color: "#828282" }}>Cost</p>
+              <p
+                className="text-2xl leading-none mt-0.5"
+                style={{
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.02em",
+                  color: "#ff682c",
+                }}
+              >
                 {interviewerCredits}
-                <span className="text-xs font-sans text-stone-500 ml-1">
+                <span className="text-xs font-sans ml-1" style={{ color: "#828282" }}>
                   cr
                 </span>
               </p>
@@ -131,7 +158,7 @@ export default function SlotPicker({
           </div>
 
           {/* Date tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-none -mx-1 px-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
             {dates.map((date) => {
               const label = formatDateTab(date);
               const active =
@@ -141,17 +168,22 @@ export default function SlotPicker({
                   key={date.toDateString()}
                   type="button"
                   onClick={() => handleDateChange(date)}
-                  className={`shrink-0 flex flex-col items-center px-3.5 py-2.5 rounded-xl border text-xs transition-all duration-200 ${
-                    active
-                      ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                      : "border-white/10 text-stone-500 hover:border-white/20 hover:text-stone-400"
-                  }`}
+                  className="shrink-0 flex flex-col items-center px-3.5 py-2.5 transition-all duration-150 cursor-pointer"
+                  style={{
+                    borderRadius: "8px",
+                    border: `1px solid ${active ? "#ff682c" : "#e8e8e8"}`,
+                    background: active ? "#ffffff" : "transparent",
+                    color: active ? "#ff682c" : "#828282",
+                    fontSize: "12px",
+                  }}
                 >
                   <span className="font-medium">{label.top}</span>
                   <span
-                    className={`mt-0.5 ${
-                      active ? "text-amber-500/70" : "text-stone-700"
-                    }`}
+                    className="mt-0.5"
+                    style={{
+                      color: active ? "#ff682c" : "#b2b2b2",
+                      fontSize: "10px",
+                    }}
                   >
                     {label.bottom}
                   </span>
@@ -160,11 +192,11 @@ export default function SlotPicker({
             })}
           </div>
 
-          <div className="h-px bg-white/5" />
+          <div className="h-px" style={{ background: "#e8e8e8" }} />
 
           {/* Time grid */}
           {slots.length === 0 ? (
-            <p className="text-xs text-stone-600 text-center py-4">
+            <p className="text-xs text-center py-4" style={{ color: "#828282" }}>
               No slots in the availability window for this date.
             </p>
           ) : (
@@ -180,19 +212,20 @@ export default function SlotPicker({
                     type="button"
                     disabled={slot.isBooked}
                     onClick={() => handleSlotClick(slot)}
-                    className={`relative text-xs px-2 py-2.5 rounded-xl border transition-all duration-200 ${
-                      isSelected
-                        ? "border-amber-400/60 bg-amber-400/15 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.08)]"
-                        : slot.isBooked
-                        ? "border-white/5 bg-white/2 text-stone-700 cursor-not-allowed"
-                        : "border-white/10 text-stone-400 hover:border-amber-400/30 hover:text-amber-400 hover:bg-amber-400/5 cursor-pointer"
-                    }`}
+                    className="relative text-xs px-2 py-2.5 transition-colors duration-150"
+                    style={{
+                      borderRadius: "8px",
+                      border: `1px solid ${isSelected ? "#ff682c" : slot.isBooked ? "transparent" : "#e8e8e8"}`,
+                      background: isSelected ? "#ff682c/10" : slot.isBooked ? "#f5f5f5" : "#ffffff",
+                      color: isSelected ? "#ff682c" : slot.isBooked ? "#b2b2b2" : "#202020",
+                      cursor: slot.isBooked ? "not-allowed" : "pointer",
+                    }}
                   >
                     {formatTime(slot.startTime)}
                     {slot.isBooked && (
                       <span
-                        className="absolute inset-x-0 bottom-0.5 text-center text-stone-700 leading-none"
-                        style={{ fontSize: "9px" }}
+                        className="absolute inset-x-0 bottom-0.5 text-center leading-none"
+                        style={{ fontSize: "8px", color: "#b2b2b2" }}
                       >
                         booked
                       </span>
@@ -204,84 +237,135 @@ export default function SlotPicker({
           )}
         </div>
 
-        {/* ── Inline confirm card ── */}
+        {/* Inline confirm card */}
         {selectedSlot && (
           <div
             ref={summaryRef}
-            className="bg-[#0f0f11] border border-amber-400/20 rounded-2xl p-6 flex flex-col gap-4"
+            className="p-6 flex flex-col gap-4"
+            style={{
+              background: "#efefef",
+              border: "1px solid #ff682c/30",
+              borderRadius: "8px",
+            }}
           >
-            <p className="text-xs font-semibold text-stone-500 tracking-widest uppercase">
+            <p
+              className="text-xs font-semibold tracking-widest uppercase"
+              style={{ color: "#816729", fontFamily: "var(--font-inter)" }}
+            >
               Your booking
             </p>
 
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs">
-                <span className="text-stone-500">Date</span>
-                <span className="text-stone-300">
+                <span style={{ color: "#828282" }}>Date</span>
+                <span style={{ color: "#202020", fontWeight: 500 }}>
                   {formatDateFull(selectedSlot.startTime)}
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-stone-500">Time</span>
-                <span className="text-stone-300">
+                <span style={{ color: "#828282" }}>Time</span>
+                <span style={{ color: "#202020", fontWeight: 500 }}>
                   {formatTime(selectedSlot.startTime)} –{" "}
                   {formatTime(selectedSlot.endTime)}
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-stone-500">Duration</span>
-                <span className="text-stone-300">
+                <span style={{ color: "#828282" }}>Duration</span>
+                <span style={{ color: "#202020", fontWeight: 500 }}>
                   {SLOT_DURATION_MINUTES} minutes
                 </span>
               </div>
             </div>
 
-            <Separator className="bg-white/8" />
+            <Separator style={{ background: "#e8e8e8" }} />
 
             <div className="flex justify-between items-center">
-              <span className="text-xs text-stone-400">Credits charged</span>
-              <span className="font-serif text-lg bg-linear-to-br from-amber-300 to-amber-500 bg-clip-text text-transparent leading-none">
+              <span className="text-xs" style={{ color: "#828282" }}>Credits charged</span>
+              <span
+                className="text-lg leading-none"
+                style={{
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  color: "#ff682c",
+                }}
+              >
                 −{interviewerCredits}
               </span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-stone-600">Balance after</span>
-              <span className="text-stone-500">
+              <span style={{ color: "#828282" }}>Balance after</span>
+              <span style={{ color: "#4d4d4d" }}>
                 {userCredits - interviewerCredits} credits
               </span>
             </div>
 
-            <div className="flex items-start gap-2.5 rounded-xl border border-white/8 bg-white/2 px-3.5 py-3">
+            <div
+              className="flex items-start gap-2.5 px-3.5 py-3"
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e8e8e8",
+                borderRadius: "8px",
+              }}
+            >
               <span className="text-sm shrink-0">🎥</span>
-              <p className="text-xs text-stone-500 font-light leading-relaxed">
+              <p className="text-xs leading-relaxed" style={{ color: "#828282" }}>
                 A video call room will be created and you&apos;ll be redirected
                 immediately after confirming.
               </p>
             </div>
 
             {error && (
-              <p className="text-xs text-red-400">{error?.message || error}</p>
+              <p className="text-xs text-red-500">{error?.message || error}</p>
             )}
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
+            <div className="flex gap-3 mt-2">
+              <button
                 disabled={loading}
                 onClick={() => setSelectedSlot(null)}
+                className="flex-1 cursor-pointer transition-all duration-200 text-center py-2.5 px-4 border text-xs"
+                style={{
+                  borderRadius: "0px",
+                  borderColor: "#202020",
+                  color: "#202020",
+                  background: "transparent",
+                  fontFamily: "var(--font-polysans)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1.2",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#202020";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#202020";
+                }}
               >
                 Change slot
-              </Button>
-              <Button
-                variant="gold"
-                size="sm"
-                className="flex-1"
+              </button>
+              <button
                 disabled={loading}
                 onClick={handleConfirm}
+                className="flex-1 cursor-pointer transition-all duration-200 text-center py-2.5 px-4 border text-xs text-white"
+                style={{
+                  borderRadius: "0px",
+                  borderColor: "#202020",
+                  background: "#202020",
+                  fontFamily: "var(--font-polysans)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1.2",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#333333";
+                  e.currentTarget.style.borderColor = "#333333";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#202020";
+                  e.currentTarget.style.borderColor = "#202020";
+                }}
               >
                 {loading ? "Creating call…" : "Confirm →"}
-              </Button>
+              </button>
             </div>
           </div>
         )}

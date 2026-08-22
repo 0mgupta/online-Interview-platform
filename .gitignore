@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# Antigravity / Gemini / Claude agent configs
+.gemini/
+.agents/
+.agent/
+.claude/

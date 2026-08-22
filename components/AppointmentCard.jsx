@@ -33,11 +33,7 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
       ? `+${creditsCharged} credits earned`
       : `−${creditsCharged} credits`;
 
-  const creditsStyle =
-    mode === "interviewer"
-      ? "border-green-500/20 bg-green-500/10 text-green-400"
-      : "border-amber-400/20 bg-amber-400/5 text-amber-400";
-
+  const creditsVariant = mode === "interviewer" ? "success" : "outline";
   const isUpcoming = status === "SCHEDULED";
 
   return (
@@ -51,44 +47,65 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
         }
       />
 
-      <article className="group relative bg-[#0f0f11] border border-white/10 transition-all duration-300 hover:-translate-y-0.5 rounded-2xl bg-linear-to-t from-transparent via-transparent to-amber-300/10 p-7 flex flex-col gap-6 self-start">
+      <article
+        className="flex flex-col gap-6 self-start transition-colors duration-200 hover:bg-fog p-7"
+        style={{ background: "#efefef", borderRadius: "8px" }}
+      >
+        {/* Header row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <Avatar className="w-14 h-14 border border-white/10 rounded-2xl shrink-0">
+            <Avatar
+              className="w-14 h-14 shrink-0"
+              style={{ borderRadius: "8px", border: "1px solid #e8e8e8" }}
+            >
               <AvatarImage
                 src={person?.imageUrl}
                 alt={person?.name}
-                className="rounded-2xl"
+                style={{ borderRadius: "8px" }}
               />
-              <AvatarFallback className="rounded-2xl bg-amber-400/10 border border-amber-400/20 text-amber-400 text-lg font-medium">
+              <AvatarFallback
+                style={{
+                  borderRadius: "8px",
+                  background: "#f5f5f5",
+                  color: "#202020",
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  fontSize: "18px",
+                }}
+              >
                 {person?.name?.[0] ?? "?"}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col gap-1 min-w-0">
-              <p className="text-base font-medium text-stone-200 leading-tight truncate">
+              <p
+                className="text-base leading-tight truncate"
+                style={{
+                  color: "#202020",
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.02em",
+                }}
+              >
                 {person?.name ?? "—"}
               </p>
               {person?.title && person?.company ? (
-                <p className="text-xs text-stone-500 truncate">
+                <p className="text-xs truncate" style={{ color: "#828282" }}>
                   {person.title}
-                  <span className="text-stone-700 mx-1.5">·</span>
+                  <span className="mx-1.5" style={{ color: "#e8e8e8" }}>·</span>
                   {person.company}
                 </p>
               ) : (
-                <p className="text-xs text-stone-600 truncate">
+                <p className="text-xs truncate" style={{ color: "#828282" }}>
                   {person?.email}
                 </p>
               )}
               {mode === "interviewee" && person?.categories?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {person.categories.slice(0, 3).map((cat) => (
-                    <span
-                      key={cat}
-                      className="text-[10px] px-2 py-0.5 rounded-md border border-amber-400/20 bg-amber-400/5 text-amber-400 leading-tight"
-                    >
+                    <Badge key={cat} variant="ghost">
                       {cat.replace("_", " ")}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               )}
@@ -99,58 +116,64 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
             <Badge variant="outline" className={STATUS_STYLES[status]}>
               {status.charAt(0) + status.slice(1).toLowerCase()}
             </Badge>
-            <Badge variant="outline" className={creditsStyle}>
+            <Badge variant={creditsVariant}>
               {creditsLabel}
             </Badge>
           </div>
         </div>
 
-        <div className="h-px bg-white/5" />
+        <div className="h-px" style={{ background: "#e8e8e8" }} />
 
+        {/* Time grid */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-stone-600">
-              <Calendar size={12} />
-              <span className="text-[10px] font-semibold tracking-widest uppercase">
-                Date
-              </span>
+          {[
+            { Icon: Calendar, label: "Date", value: formatDate(startTime) },
+            {
+              Icon: Clock,
+              label: "Time",
+              value: `${formatTime(startTime)} – ${formatTime(endTime)}`,
+            },
+            {
+              Icon: Video,
+              label: "Duration",
+              value: formatDuration(startTime, endTime),
+            },
+          ].map(({ Icon, label, value }) => (
+            <div key={label} className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-1.5" style={{ color: "#828282" }}>
+                <Icon size={11} />
+                <span
+                  className="text-[10px] font-medium tracking-[0.08em] uppercase"
+                  style={{ fontFamily: "var(--font-inter)" }}
+                >
+                  {label}
+                </span>
+              </div>
+              <p className="text-sm" style={{ color: "#202020" }}>{value}</p>
             </div>
-            <p className="text-sm text-stone-300">{formatDate(startTime)}</p>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-stone-600">
-              <Clock size={12} />
-              <span className="text-[10px] font-semibold tracking-widest uppercase">
-                Time
-              </span>
-            </div>
-            <p className="text-sm text-stone-300">
-              {formatTime(startTime)}
-              <span className="text-stone-600 mx-1">–</span>
-              {formatTime(endTime)}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-stone-600">
-              <Video size={12} />
-              <span className="text-[10px] font-semibold tracking-widest uppercase">
-                Duration
-              </span>
-            </div>
-            <p className="text-sm text-stone-300">
-              {formatDuration(startTime, endTime)}
-            </p>
-          </div>
+          ))}
         </div>
 
+        {/* AI feedback snippet */}
         {feedback?.summary && (
-          <div className="rounded-xl border border-white/8 bg-[#141417] px-4 py-3 flex flex-col gap-1.5">
-            <p className="text-[10px] font-semibold text-stone-600 tracking-widest uppercase">
+          <div
+            className="px-4 py-3 flex flex-col gap-1.5"
+            style={{
+              background: "#ffffff",
+              borderRadius: "8px",
+              border: "1px solid #e8e8e8",
+            }}
+          >
+            <p
+              className="text-[10px] font-medium tracking-[0.08em] uppercase"
+              style={{ color: "#816729", fontFamily: "var(--font-inter)" }}
+            >
               AI Feedback
             </p>
-            <p className="text-xs text-stone-400 font-light leading-relaxed line-clamp-2">
+            <p
+              className="text-xs leading-relaxed line-clamp-2"
+              style={{ color: "#4d4d4d" }}
+            >
               {feedback.summary}
             </p>
           </div>
@@ -159,42 +182,87 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
         {(streamCallId || recordingUrl || feedback) && (
           <div className="flex items-center gap-2 flex-wrap pt-1">
             {!isPast && streamCallId && isUpcoming && (
-              <Button variant="gold" size="sm" className="gap-2" asChild>
-                <Link href={`/call/${streamCallId}`}>
-                  <Video size={13} />
-                  Join call
-                </Link>
-              </Button>
+              <Link
+                href={`/call/${streamCallId}`}
+                className="inline-flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 text-center py-2 px-4 border text-xs text-white"
+                style={{
+                  borderRadius: "0px",
+                  borderColor: "#202020",
+                  background: "#202020",
+                  fontFamily: "var(--font-polysans)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1.2",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#333333";
+                  e.currentTarget.style.borderColor = "#333333";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#202020";
+                  e.currentTarget.style.borderColor = "#202020";
+                }}
+              >
+                <Video size={13} />
+                Join call
+              </Link>
             )}
 
             {recordingUrl && has?.({ plan: "pro" }) && (
-              <Button variant="outline" size="sm" className="gap-2" asChild>
-                <a
-                  href={recordingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  📹 Recording
-                </a>
-              </Button>
+              <a
+                href={recordingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 text-center py-2 px-4 border text-xs"
+                style={{
+                  borderRadius: "0px",
+                  borderColor: "#202020",
+                  color: "#202020",
+                  background: "transparent",
+                  fontFamily: "var(--font-polysans)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1.2",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#202020";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#202020";
+                }}
+              >
+                📹 Recording
+              </a>
             )}
 
             {feedback &&
               (has?.({ plan: "starter" }) || has?.({ plan: "pro" })) && (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 border-amber-400/20 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400/40"
+                  <button
                     onClick={() => setFeedbackOpen(true)}
+                    className="inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 text-center py-2 px-4 border text-xs"
+                    style={{
+                      borderRadius: "0px",
+                      borderColor: "#ff682c",
+                      color: "#ff682c",
+                      background: "transparent",
+                      fontFamily: "var(--font-polysans)",
+                      letterSpacing: "-0.02em",
+                      lineHeight: "1.2",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(255, 104, 44, 0.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                    }}
                   >
                     <Sparkles size={12} />
                     Full Feedback
-                  </Button>
-                  <Badge
-                    variant="outline"
-                    className={RATING_STYLES[feedback.overallRating]}
-                  >
+                  </button>
+                  <Badge variant="brass">
                     ✦ {RATING_LABEL[feedback.overallRating]} performance
                   </Badge>
                 </>

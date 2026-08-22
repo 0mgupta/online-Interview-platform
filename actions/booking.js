@@ -21,6 +21,7 @@ export const getInterviewerProfile = async (interviewerId) => {
       where: { id: interviewerId, role: "INTERVIEWER" },
       select: {
         id: true,
+        clerkUserId: true,
         name: true,
         imageUrl: true,
         title: true,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { CATEGORIES } from "@/lib/data";
@@ -29,18 +30,23 @@ export default function ExploreGrid({ interviewers }) {
   return (
     <div className="flex flex-col gap-8">
       {/* Filters bar */}
-      <div className="flex flex-col gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex flex-col gap-4"
+      >
         {/* Search */}
         <div className="relative max-w-sm">
           <Search
             size={14}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-600 pointer-events-none"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-steel pointer-events-none"
           />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, title or company…"
-            className="pl-9 bg-[#0f0f11] border-white/10 text-stone-100 placeholder:text-stone-600 text-sm"
+            className="pl-9 bg-white border-[#e8e8e8] text-graphite placeholder:text-slate text-sm rounded-none focus-visible:outline-none"
           />
         </div>
 
@@ -53,52 +59,75 @@ export default function ExploreGrid({ interviewers }) {
                 key={String(cat.value)}
                 type="button"
                 onClick={() => setActiveCategory(cat.value)}
-                className={`cursor-pointer text-xs px-4 py-2 rounded-lg border transition-all duration-200 ${
-                  active
-                    ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
-                    : "border-white/10 text-stone-500 hover:border-white/20 hover:text-stone-400"
-                }`}
+                className="cursor-pointer text-xs px-4 py-2 transition-all duration-150"
+                suppressHydrationWarning
+                style={{
+                  borderRadius: "0px",
+                  border: `1px solid ${active ? "#202020" : "#e8e8e8"}`,
+                  background: active ? "#202020" : "transparent",
+                  color: active ? "#ffffff" : "#828282",
+                  fontFamily: "var(--font-polysans)",
+                  letterSpacing: "-0.02em",
+                }}
               >
                 {cat.label}
               </button>
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
       {/* Result count */}
-      <p className="text-xs text-stone-600">
+      <motion.p
+        key={filtered.length}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-xs text-slate"
+      >
         {filtered.length === 0
           ? "No interviewers found"
-          : `${filtered.length} interviewer${
-              filtered.length === 1 ? "" : "s"
-            } found`}
-      </p>
+          : `${filtered.length} interviewer${filtered.length === 1 ? "" : "s"} found`}
+      </motion.p>
 
-      {/* Grid */}
-      {filtered.length === 0 ? (
-        <div className="py-20 text-center">
-          <p className="text-stone-600 text-sm">
-            No interviewers match your filters.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveCategory(null);
-              setSearch("");
-            }}
-            className="text-xs text-amber-400 mt-2 hover:text-amber-300 transition-colors"
+      {/* Grid with AnimatePresence for filter transitions */}
+      <AnimatePresence mode="wait">
+        {filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.25 }}
+            className="py-20 text-center"
+            style={{ background: "#efefef", borderRadius: "8px" }}
           >
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((interviewer) => (
-            <InterviewerCard key={interviewer.id} interviewer={interviewer} />
-          ))}
-        </div>
-      )}
+            <p className="text-sm" style={{ color: "#4d4d4d" }}>
+              No interviewers match your filters.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setActiveCategory(null); setSearch(""); }}
+              className="text-xs mt-2 underline"
+              style={{ color: "#ff682c", textDecorationColor: "#ff682c" }}
+            >
+              Clear filters
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            {filtered.map((interviewer, i) => (
+              <InterviewerCard key={interviewer.id} interviewer={interviewer} index={i} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -25,7 +25,7 @@ export const setAvailability = async ({ startTime, endTime }) => {
   if (!user) throw new Error("Unauthorized");
 
   let dbUser = await db.user.findUnique({ where: { clerkUserId: user.id } });
-  
+
   // Create user if doesn't exist
   if (!dbUser) {
     dbUser = await db.user.create({
@@ -37,7 +37,7 @@ export const setAvailability = async ({ startTime, endTime }) => {
       },
     });
   }
-  
+
   if (dbUser.role !== "INTERVIEWER") throw new Error("Unauthorized - Interviewer access required");
 
   if (!startTime || !endTime) throw new Error("Start and end time required");
@@ -197,7 +197,7 @@ export const requestWithdrawal = async ({
         })
       );
       await resend.emails.send({
-        from: "Prept <onboarding@resend.dev>",
+        from: "Calibrate <onboarding@resend.dev>",
         to: ADMIN_EMAIL,
         subject: `Withdrawal Request — ${dbUser.name} · ${credits} credits`,
         html,
@@ -225,4 +225,34 @@ export const getWithdrawalHistory = async () => {
     where: { interviewerId: dbUser.id },
     orderBy: { createdAt: "desc" },
   });
+};
+
+export const updateInterviewerProfile = async (profileData) => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const dbUser = await db.user.findUnique({ where: { clerkUserId: user.id } });
+  if (!dbUser || dbUser.role !== "INTERVIEWER") {
+    throw new Error("Unauthorized - Interviewer access required");
+  }
+
+  const { title, company, yearsExp, bio, creditRate, categories } = profileData;
+
+  const updated = await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      title: title || null,
+      company: company || null,
+      yearsExp: yearsExp ? parseInt(yearsExp, 10) : null,
+      bio: bio || null,
+      creditRate: creditRate ? parseInt(creditRate, 10) : 1,
+      categories: categories || [],
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/explore");
+  revalidatePath(`/interviewers/${dbUser.id}`);
+
+  return { success: true, user: updated };
 };

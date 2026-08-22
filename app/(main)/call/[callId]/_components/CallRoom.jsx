@@ -14,6 +14,7 @@ import "stream-chat-react/dist/css/v2/index.css";
 
 import { Loader2 } from "lucide-react";
 import CallUI from "./CallUI";
+import { startCallRecording } from "@/actions/call";
 
 export default function CallRoom({
   callId,
@@ -99,8 +100,7 @@ export default function CallRoom({
             return callInstance.microphone.disable().catch(() => {});
           });
         } else {
-          console.warn("CallRoom: Audio disabled (missing device or permission denied).");
-          setMediaError((prev) => ({ ...prev, audio: !hasAudio ? "missing" : "denied" }));
+          setMediaError((prev) => ({ ...prev, audio: hasAudio ? "denied" : "missing" }));
           await callInstance.microphone.disable().catch(() => {});
         }
 
@@ -112,58 +112,53 @@ export default function CallRoom({
             return callInstance.camera.disable().catch(() => {});
           });
         } else {
-          console.warn("CallRoom: Video disabled (missing device or permission denied).");
-          setMediaError((prev) => ({ ...prev, video: !hasVideo ? "missing" : "denied" }));
+          setMediaError((prev) => ({ ...prev, video: hasVideo ? "denied" : "missing" }));
           await callInstance.camera.disable().catch(() => {});
         }
 
-        await callInstance.join({ create: false });
-        clientRef.current = client;
-        setVideoClient(client);
+        // Retrieve call details from the server (already created during booking)
+        await callInstance.get();
+
+        // Join call
+        await callInstance.join();
         setCall(callInstance);
-      } catch (err) {
-        console.warn("Failed to join call, disabling media devices and retrying...", err);
-        try {
-          // Disable both devices to bypass media capture failures
-          await callInstance.microphone.disable().catch(() => {});
-          await callInstance.camera.disable().catch(() => {});
-          
-          await callInstance.join({ create: false });
-          clientRef.current = client;
-          setVideoClient(client);
-          setCall(callInstance);
-        } catch (joinErr) {
-          console.error("Critical: Fallback join failed even with media disabled:", joinErr);
+        setVideoClient(client);
+        clientRef.current = client;
+
+        // Auto-start recording for Interviewers to capture session logs
+        if (isInterviewer) {
+          const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("recording start timeout")), 3000)
+          );
+          await Promise.race([startCallRecording(callId), timeout]).catch((err) => {
+            console.warn("Failed to auto-start call recording via server:", err);
+          });
         }
+      } catch (err) {
+        console.error("Failed to join call room:", err);
+        // Force state setting to unblock UI even if joining fails partly
+        setCall(callInstance);
+        setVideoClient(client);
+        clientRef.current = client;
       }
     };
 
     checkDevicesAndJoin();
 
     return () => {
-      callInstance.leave().catch(() => {});
-      client.disconnectUser().catch(() => {});
-      clientRef.current = null;
-      joinedRef.current = false; // reset so hot reload works
+      // Disconnect handled in CallUI.jsx handleLeave method
     };
-  }, [
-    apiKey,
-    callId,
-    currentUser.id,
-    currentUser.imageUrl,
-    currentUser.name,
-    token,
-  ]);
+  }, [callId, token, apiKey, currentUser, isInterviewer]);
 
   const handleLeave = useCallback(() => {
-    router.push(isInterviewer ? "/dashboard" : "/appointments");
-  }, [isInterviewer, router]);
+    router.replace(isInterviewer ? "/dashboard" : "/appointments");
+  }, [router, isInterviewer]);
 
   if (!videoClient || !call) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center gap-3">
-        <Loader2 size={28} className="text-amber-400 animate-spin" />
-        <p className="text-stone-500 text-sm font-light">Connecting to call…</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3">
+        <Loader2 size={24} className="text-graphite animate-spin" />
+        <p className="text-slate text-sm font-light">Connecting to call room…</p>
       </div>
     );
   }

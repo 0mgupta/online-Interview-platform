@@ -17,6 +17,7 @@ function Input({
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
         className
       )}
+      suppressHydrationWarning
       {...props} />
   );
 }

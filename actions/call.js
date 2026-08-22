@@ -65,3 +65,58 @@ export const getCallData = async (callId) => {
     },
   };
 };
+
+export const startCallRecording = async (callId) => {
+  const user = await currentUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const booking = await db.booking.findUnique({
+    where: { streamCallId: callId },
+    include: { interviewer: true },
+  });
+
+  if (!booking) return { error: "Call not found" };
+  if (booking.interviewer.clerkUserId !== user.id) return { error: "Forbidden" };
+
+  const streamClient = new StreamClient(
+    process.env.NEXT_PUBLIC_STREAM_API_KEY,
+    process.env.STREAM_API_SECRET
+  );
+
+  try {
+    const call = streamClient.video.call("default", callId);
+    await call.startRecording();
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to start recording on server:", err);
+    return { error: err.message };
+  }
+};
+
+export const stopCallRecording = async (callId) => {
+  const user = await currentUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const booking = await db.booking.findUnique({
+    where: { streamCallId: callId },
+    include: { interviewer: true },
+  });
+
+  if (!booking) return { error: "Call not found" };
+  if (booking.interviewer.clerkUserId !== user.id) return { error: "Forbidden" };
+
+  const streamClient = new StreamClient(
+    process.env.NEXT_PUBLIC_STREAM_API_KEY,
+    process.env.STREAM_API_SECRET
+  );
+
+  try {
+    const call = streamClient.video.call("default", callId);
+    await call.stopRecording();
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to stop recording on server:", err);
+    return { error: err.message };
+  }
+};
+

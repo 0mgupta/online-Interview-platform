@@ -43,9 +43,10 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
+  const isProtected = isProtectedRoute(req);
+
+  if (!userId && isProtected) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();

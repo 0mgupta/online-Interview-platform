@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { CheckoutButton } from "@clerk/nextjs/experimental";
 import { SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PLANS } from "@/lib/data";
 
 export default function PricingSection() {
@@ -23,56 +24,89 @@ export default function PricingSection() {
     : null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {PLANS.map((plan) => {
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {PLANS.map((plan, i) => {
         const isActive = activePlanSlug === plan.slug;
 
         return (
           <div
             key={plan.name}
-            className={`relative rounded-2xl p-10 h-full flex flex-col transition-all duration-300 hover:-translate-y-1 ${
-              plan.featured
-                ? "bg-[#141417] border border-amber-400/20"
-                : "bg-[#0f0f11] border border-white/10 hover:border-amber-400/10"
-            } ${isActive ? "ring-1 ring-amber-400/30" : ""}`}
+            className="relative flex flex-col transition-colors duration-200"
+            style={{
+              background: plan.featured ? "#ebebeb" : "#efefef",
+              borderRadius: i === 1 ? "6px 0px 6px 6px" : "8px",
+              padding: "40px",
+              border: isActive ? "1.5px solid #202020" : "none",
+            }}
           >
-            {/* Most Popular badge */}
+            {/* Featured badge */}
             {plan.featured && !isActive && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-[#0a0a0b] text-xs font-bold tracking-wide uppercase px-3.5 py-1 rounded-full whitespace-nowrap">
+              <span
+                className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-medium tracking-wide uppercase px-3.5 py-1 whitespace-nowrap"
+                style={{
+                  background: "#202020",
+                  color: "#ffffff",
+                  borderRadius: "20px",
+                  fontFamily: "var(--font-inter)",
+                }}
+              >
                 Most Popular
               </span>
             )}
 
-            <p className="text-xs font-semibold text-stone-500 tracking-widest uppercase mb-5">
+            {/* Plan name */}
+            <p
+              className="text-xs font-medium tracking-[0.08em] uppercase mb-6"
+              style={{ color: "#816729", fontFamily: "var(--font-inter)" }}
+            >
               {plan.name}
             </p>
 
+            {/* Price */}
             <div className="flex items-end gap-1 mb-1.5">
               <span
-                className={`font-serif text-5xl leading-none tracking-tight ${
-                  plan.featured
-                    ? "bg-linear-to-br from-amber-300 to-amber-500 bg-clip-text text-transparent"
-                    : "bg-linear-to-br from-stone-100 to-stone-400 bg-clip-text text-transparent"
-                }`}
+                style={{
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  fontSize: "48px",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                  color: plan.featured ? "#ff682c" : "#202020",
+                }}
               >
                 {plan.price}
               </span>
-              <span className="text-sm text-stone-500 font-light mb-1.5">
+              <span
+                className="text-sm mb-2"
+                style={{ color: "#828282", fontFamily: "var(--font-inter)" }}
+              >
                 /month
               </span>
             </div>
 
-            <p className="text-sm text-amber-400 mb-7">{plan.credits}</p>
+            <p className="text-sm mb-7" style={{ color: "#ff682c" }}>
+              {plan.credits}
+            </p>
 
-            <div className="h-px bg-white/10 mb-7" />
+            <div className="h-px mb-7" style={{ background: "#e8e8e8" }} />
 
             <ul className="space-y-3 mb-9 flex-1">
               {plan.features.map((f) => (
                 <li
                   key={f}
-                  className="flex items-start gap-2.5 text-sm text-stone-400"
+                  className="flex items-start gap-2.5 text-sm"
+                  style={{ color: "#4d4d4d" }}
                 >
-                  <span className="text-amber-400 text-xs mt-0.5">✓</span>
+                  <span
+                    className="text-xs mt-0.5 w-4 h-4 shrink-0 flex items-center justify-center"
+                    style={{
+                      border: "1px solid #e8e8e8",
+                      borderRadius: "4px",
+                      color: "#ff682c",
+                    }}
+                  >
+                    ✓
+                  </span>
                   {f}
                 </li>
               ))}
@@ -80,22 +114,12 @@ export default function PricingSection() {
 
             {/* CTA */}
             {isActive ? (
-              // Already on this plan
-              <Button
-                variant={plan.featured ? "gold" : "default"}
-                disabled
-                className="w-full opacity-50 cursor-not-allowed"
-              >
+              <Button variant="outline" disabled className="w-full opacity-50 cursor-not-allowed">
                 ✓ Current plan
               </Button>
             ) : plan.planId === null ? (
-              // Free plan — no checkout needed
               isSignedIn ? (
-                <Button
-                  variant="outline"
-                  disabled
-                  className="w-full opacity-50 cursor-not-allowed"
-                >
+                <Button variant="outline" disabled className="w-full opacity-50 cursor-not-allowed">
                   Default plan
                 </Button>
               ) : (
@@ -110,17 +134,11 @@ export default function PricingSection() {
                 planId={plan.planId}
                 planPeriod="month"
                 checkoutProps={{
-                  appearance: {
-                    elements: {
-                      drawerRoot: {
-                        zIndex: 2000,
-                      },
-                    },
-                  },
+                  appearance: { elements: { drawerRoot: { zIndex: 2000 } } },
                 }}
               >
                 <Button
-                  variant={plan.featured ? "gold" : "outline"}
+                  variant={plan.featured ? "default" : "outline"}
                   className="w-full"
                 >
                   {activePlanSlug === "pro" && plan.slug === "starter"
@@ -131,10 +149,9 @@ export default function PricingSection() {
                 </Button>
               </CheckoutButton>
             ) : (
-              // Paid plan, signed out → sign in first
               <SignInButton mode="modal">
                 <Button
-                  variant={plan.featured ? "gold" : "outline"}
+                  variant={plan.featured ? "default" : "outline"}
                   className="w-full"
                 >
                   Get started →

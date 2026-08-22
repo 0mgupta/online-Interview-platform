@@ -16,7 +16,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { GrayTitle } from "@/components/reusables";
 import { requestWithdrawal } from "@/actions/dashboard";
 import useFetch from "@/hooks/use-fetch";
 import { CircleCheck, TrendingUp, Wallet } from "lucide-react";
@@ -82,43 +81,59 @@ export default function EarningsSection({ stats, history }) {
             label: "Credit balance",
             value: stats?.creditBalance ?? 0,
             unit: "credits",
-            gold: true,
-            icon: <Wallet size={16} className="text-amber-400" />,
+            highlight: true,
+            icon: <Wallet size={14} className="text-graphite" />,
             dollarValue: balance,
           },
           {
             label: "Total earned",
             value: stats?.totalEarned ?? 0,
             unit: "credits",
-            gold: false,
-            icon: <TrendingUp size={16} className="text-stone-400" />,
+            highlight: false,
+            icon: <TrendingUp size={14} className="text-steel" />,
             dollarValue: totalEarnedDollars,
           },
           {
             label: "Sessions done",
             value: stats?.completedSessions ?? 0,
             unit: "completed",
-            gold: false,
-            icon: <CircleCheck size={16} className="text-stone-400" />,
+            highlight: false,
+            icon: <CircleCheck size={14} className="text-steel" />,
           },
         ].map((stat) => (
           <div
             key={stat.label}
-            className="bg-[#0f0f11] border border-white/10 rounded-2xl p-6 flex flex-col gap-2"
+            className="flex flex-col gap-2 p-6"
+            style={{
+              background: "#efefef",
+              borderRadius: "8px",
+            }}
           >
-            <span className="text-lg">{stat.icon}</span>
+            <span
+              className="w-8 h-8 flex items-center justify-center"
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e8e8e8",
+                borderRadius: "6px",
+              }}
+            >
+              {stat.icon}
+            </span>
             <p
-              className={`font-serif text-4xl leading-none tracking-tight ${
-                stat.gold
-                  ? "bg-linear-to-br from-amber-300 to-amber-500 bg-clip-text text-transparent"
-                  : "bg-linear-to-br from-stone-100 to-stone-400 bg-clip-text text-transparent"
-              }`}
+              style={{
+                fontFamily: "var(--font-polysans)",
+                fontWeight: 400,
+                fontSize: "36px",
+                lineHeight: 1,
+                letterSpacing: "-0.02em",
+                color: stat.highlight ? "#ff682c" : "#202020",
+              }}
             >
               {stat.value}
             </p>
-            <p className="text-xs text-stone-600">{stat.unit}</p>
+            <p className="text-xs" style={{ color: "#828282" }}>{stat.unit}</p>
 
-            <p className="text-xs text-stone-500">
+            <p className="text-xs mt-1" style={{ color: "#4d4d4d" }}>
               {stat.label}{" "}
               {stat.dollarValue !== undefined
                 ? `($${stat?.dollarValue?.toFixed(2)})`
@@ -129,20 +144,34 @@ export default function EarningsSection({ stats, history }) {
       </div>
 
       {/* Withdrawal trigger card */}
-      <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex items-center justify-between gap-4">
+      <div
+        className="p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+        style={{
+          background: "#efefef",
+          borderRadius: "6px 0px 6px 6px",
+        }}
+      >
         <div>
-          <h2 className="font-serif text-xl tracking-tight">
-            <GrayTitle>Withdraw earnings</GrayTitle>
+          <h2
+            className="text-lg"
+            style={{
+              fontFamily: "var(--font-polysans)",
+              fontWeight: 400,
+              letterSpacing: "-0.02em",
+              color: "#202020",
+            }}
+          >
+            Withdraw earnings
           </h2>
-          <p className="text-xs text-stone-500 font-light mt-1">
+          <p className="text-xs mt-1" style={{ color: "#4d4d4d" }}>
             20% platform fee applies. Processed within 2–3 business days.
           </p>
         </div>
         <Button
-          variant="gold"
+          variant="default"
           disabled={balance <= 0}
           onClick={() => setOpen(true)}
-          className="shrink-0"
+          className="shrink-0 w-full sm:w-auto"
         >
           Request withdrawal
         </Button>
@@ -150,31 +179,40 @@ export default function EarningsSection({ stats, history }) {
 
       {/* Withdrawal history */}
       {history?.length > 0 && (
-        <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-5">
-          <p className="text-xs font-semibold text-stone-500 tracking-widest uppercase">
+        <div
+          className="p-8 flex flex-col gap-5"
+          style={{
+            background: "#efefef",
+            borderRadius: "8px",
+          }}
+        >
+          <p
+            className="text-xs font-semibold tracking-widest uppercase"
+            style={{ color: "#816729", fontFamily: "var(--font-inter)" }}
+          >
             Withdrawal history
           </p>
           <div className="flex flex-col gap-3">
             {history.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between bg-[#141417] border border-white/8 rounded-xl px-5 py-4"
+                className="flex items-center justify-between p-4"
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid #e8e8e8",
+                  borderRadius: "8px",
+                }}
               >
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-sm text-stone-300">
+                  <p className="text-sm" style={{ color: "#202020" }}>
                     {p.credits} credits → ${p.netAmount.toFixed(2)}
                   </p>
-                  <p className="text-xs text-stone-600">
+                  <p className="text-xs" style={{ color: "#828282" }}>
                     {p.paymentMethod} · {formatDate(p.createdAt)}
                   </p>
                 </div>
                 <Badge
-                  variant="outline"
-                  className={
-                    p.status === "PROCESSED"
-                      ? "border-green-500/20 bg-green-500/10 text-green-400"
-                      : "border-amber-500/20 bg-amber-500/10 text-amber-400"
-                  }
+                  variant={p.status === "PROCESSED" ? "success" : "warning"}
                 >
                   {p.status.charAt(0) + p.status.slice(1).toLowerCase()}
                 </Badge>
@@ -186,55 +224,93 @@ export default function EarningsSection({ stats, history }) {
 
       {/* Dialog */}
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-[#0f0f11] border border-white/10 text-stone-100 max-w-md">
+        <DialogContent
+          className="max-w-md"
+          style={{
+            background: "#ffffff",
+            border: "1px solid #e8e8e8",
+            borderRadius: "8px",
+            color: "#202020",
+          }}
+        >
           {done ? (
             <div className="py-8 text-center flex flex-col items-center gap-4">
-              <span className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">
+              <span
+                className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+                style={{
+                  background: "#f5f5f5",
+                  border: "1px solid #e8e8e8",
+                  color: "#ff682c",
+                }}
+              >
                 ✓
               </span>
-              <p className="font-serif text-xl">
-                <GrayTitle>Request submitted</GrayTitle>
+              <p
+                className="text-xl"
+                style={{
+                  fontFamily: "var(--font-polysans)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Request submitted
               </p>
-              <p className="text-xs text-stone-500 font-light">
+              <p className="text-xs" style={{ color: "#828282" }}>
                 We&apos;ll process your withdrawal within 2–3 business days.
               </p>
             </div>
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle className="font-serif text-xl tracking-tight">
-                  <GrayTitle>Request withdrawal</GrayTitle>
+                <DialogTitle
+                  style={{
+                    fontFamily: "var(--font-polysans)",
+                    fontWeight: 400,
+                    fontSize: "20px",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  Request withdrawal
                 </DialogTitle>
-                <DialogDescription className="text-stone-500 text-xs font-light">
+                <DialogDescription style={{ color: "#828282", fontSize: "12px" }}>
                   Your full balance of{" "}
-                  <span className="text-amber-400">{balance} credits</span> will
-                  be withdrawn.
+                  <span style={{ color: "#ff682c", fontWeight: 500 }}>
+                    {stats?.creditBalance} credits
+                  </span>{" "}
+                  will be withdrawn.
                 </DialogDescription>
               </DialogHeader>
 
-              <Separator className="bg-white/5" />
+              <Separator style={{ background: "#e8e8e8" }} />
 
               <div className="flex flex-col gap-5 py-2">
                 {/* Fee breakdown */}
-                <div className="rounded-xl bg-[#141417] border border-white/8 p-4 flex flex-col gap-2">
-                  <div className="flex justify-between text-xs text-stone-500">
+                <div
+                  className="p-4 flex flex-col gap-2"
+                  style={{
+                    background: "#f5f5f5",
+                    border: "1px solid #e8e8e8",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <div className="flex justify-between text-xs" style={{ color: "#4d4d4d" }}>
                     <span>Balance (1 Cr = $5)</span>
-                    <span className="text-green-400">${balance}</span>
+                    <span className="font-medium" style={{ color: "#202020" }}>${balance}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-stone-500">
+                  <div className="flex justify-between text-xs" style={{ color: "#4d4d4d" }}>
                     <span>Platform fee (20%)</span>
-                    <span className="text-red-400">− ${feeAmount}</span>
+                    <span className="font-medium" style={{ color: "#ff682c" }}>− ${feeAmount}</span>
                   </div>
-                  <Separator className="bg-white/8 my-1" />
+                  <Separator style={{ background: "#e8e8e8", margin: "4px 0" }} />
                   <div className="flex justify-between text-sm font-medium">
-                    <span className="text-stone-300">You receive</span>
-                    <span className="text-amber-400">${netAmount}</span>
+                    <span style={{ color: "#202020" }}>You receive</span>
+                    <span style={{ color: "#ff682c" }}>${netAmount}</span>
                   </div>
                 </div>
 
                 {/* Payment method — Tabs */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-stone-400 text-xs">
+                  <Label className="text-xs" style={{ color: "#4d4d4d" }}>
                     Payment method
                   </Label>
                   <Tabs
@@ -244,12 +320,23 @@ export default function EarningsSection({ stats, history }) {
                       setDetail("");
                     }}
                   >
-                    <TabsList className="bg-[#141417] border border-white/10 w-full">
+                    <TabsList
+                      className="w-full"
+                      style={{
+                        background: "#efefef",
+                        borderRadius: "6px",
+                      }}
+                    >
                       {PAYMENT_METHODS.map((m) => (
                         <TabsTrigger
                           key={m.value}
                           value={m.value}
-                          className="flex-1 text-xs"
+                          className="flex-1 text-xs data-[state=active]:bg-white data-[state=active]:text-graphite data-[state=active]:shadow-none"
+                          style={{
+                            fontFamily: "var(--font-polysans)",
+                            letterSpacing: "-0.02em",
+                            borderRadius: "4px",
+                          }}
                         >
                           {m.label}
                         </TabsTrigger>
@@ -260,19 +347,19 @@ export default function EarningsSection({ stats, history }) {
 
                 {/* Payment detail */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-stone-400 text-xs">
+                  <Label className="text-xs" style={{ color: "#4d4d4d" }}>
                     {selectedMethod?.label} details
                   </Label>
                   <Input
                     value={detail}
                     onChange={(e) => setDetail(e.target.value)}
                     placeholder={selectedMethod?.placeholder}
-                    className="bg-[#141417] border-white/10 text-stone-100"
+                    className="text-graphite border-[#e8e8e8] bg-white rounded-none"
                   />
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-400">
+                  <p className="text-xs text-red-500">
                     {error?.message || error}
                   </p>
                 )}
@@ -287,7 +374,7 @@ export default function EarningsSection({ stats, history }) {
                   Cancel
                 </Button>
                 <Button
-                  variant="gold"
+                  variant="default"
                   disabled={!isValid || loading}
                   onClick={() =>
                     withdrawFn({
