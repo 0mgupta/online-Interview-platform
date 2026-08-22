@@ -71,7 +71,9 @@ export default function OnboardingPage() {
   const [autoSubmitted, setAutoSubmitted] = useState(false);
   useEffect(() => {
     if (!checkingRole && dbUser && dbUser.role === "UNASSIGNED" && !autoSubmitted && !loading && !data) {
-      setAutoSubmitted(true);
+      setTimeout(() => {
+        setAutoSubmitted(true);
+      }, 0);
       if (resolvedRole === "INTERVIEWER") {
         onboardingFn({
           role: "INTERVIEWER",

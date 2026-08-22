@@ -35,7 +35,9 @@ export default function AnimatedHeader({ user, roleRedirect }) {
   };
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => {
+      setMounted(true);
+    }, 0);
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -190,7 +192,9 @@ function NavLink({ href, children, small = false, active = false }) {
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    setHovered(false);
+    setTimeout(() => {
+      setHovered(false);
+    }, 0);
   }, [active]);
 
   const showUnderline = active || hovered;

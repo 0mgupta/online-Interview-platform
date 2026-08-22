@@ -163,9 +163,9 @@ function LandingPageContent() {
   useEffect(() => {
     const param = searchParams.get("view");
     if (param === "interviewer") {
-      setView("interviewer");
+      setTimeout(() => { setView("interviewer"); }, 0);
     } else if (param === "candidate") {
-      setView("candidate");
+      setTimeout(() => { setView("candidate"); }, 0);
     }
   }, [searchParams]);
 
