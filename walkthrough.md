@@ -91,7 +91,7 @@ We have successfully completed merging the dedicated interviewer page into the m
 ### 20. Suppressed Browser-Injected Element Hydration Warnings
 - Added the `suppressHydrationWarning` attribute to the custom base UI `<Button>` wrapper, the `<Input>` wrapper, and category selector HTML `<button>` nodes to cleanly prevent React hydration console mismatch errors.
 
-### 21. Vercel Edge Function Size Optimization
-- Resolved Vercel deployment blocker (`Edge Function "middleware" size is 1.1 MB and your plan size limit is 1 MB`). Removed the heavy `@arcjet/next` package imports from global middleware ([`middleware.js`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/middleware.js)).
-- This reduced the Edge middleware footprint to under ~100 KB while retaining active Arcjet shield protection inside serverless actions.
+### 21. Next.js 16 Proxy Migration & Edge Function Size Optimization
+- Migrated global middleware to the new Next.js 16 convention by renaming [`middleware.js`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/middleware.js) to [`proxy.js`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/proxy.js).
+- Removed the deprecated `runtime: 'nodejs'` segment config from [`proxy.js`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/proxy.js) since the Next.js 16 Proxy now executes on the Node.js runtime by default, resolving Vercel's strict 1 MB Edge Function size limit blocker.
 - Fixed 4 ESLint build issues concerning synchronous `setState` updates inside `useEffect` bodies across [`onboarding/page.jsx`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/app/(main)/onboarding/page.jsx), [`AnimatedHeader.jsx`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/components/AnimatedHeader.jsx), and [`InteractiveLandingPage.jsx`](file:///c:/Users/OM/OneDrive/Desktop/one-on-one-interview/ai-interview-platform/components/InteractiveLandingPage.jsx).
