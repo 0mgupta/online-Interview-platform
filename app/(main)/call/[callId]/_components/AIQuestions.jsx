@@ -46,10 +46,9 @@ export default function AIQuestionsPanel({ categories }) {
 
       <Button
         variant="default"
-        size="sm"
         disabled={loading || !selectedCategory}
         onClick={() => generateFn({ category: selectedCategory })}
-        className="self-start gap-2"
+        className="self-start gap-2 shrink-0"
       >
         {loading ? (
           <>
